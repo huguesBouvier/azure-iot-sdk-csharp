@@ -70,11 +70,11 @@ namespace Microsoft.Azure.Devices.Client.HsmAuthentication
                 {
                     case SwaggerException<ErrorResponse> errorResponseException:
                         throw new HttpHsmComunicationException(
-                            $"Error calling SignAsync: {errorResponseException.Result?.Message ?? string.Empty}",
+                            $"Error calling GenerateToken: {errorResponseException.Result?.Message ?? string.Empty}",
                             errorResponseException.StatusCode);
                     case SwaggerException swaggerException:
                         throw new HttpHsmComunicationException(
-                            $"Error calling SignAsync: {swaggerException.Response ?? string.Empty}",
+                            $"Error calling GenerateToken: {swaggerException.Response ?? string.Empty}",
                             swaggerException.StatusCode);
                     default:
                         throw;

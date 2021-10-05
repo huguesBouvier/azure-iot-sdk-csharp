@@ -91,7 +91,7 @@ namespace Microsoft.Azure.Devices.Client.HsmAuthentication.GeneratedCode
                         ProcessResponse(client_, response_);
 
                         var status_ = ((int)response_.StatusCode).ToString();
-                        if (status_ == "200")
+                        if (status_ == "201")
                         {
                             var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
                             var result_ = default(GenerateTokenResponse);
