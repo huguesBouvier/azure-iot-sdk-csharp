@@ -121,8 +121,9 @@ namespace Microsoft.Azure.Devices.Client
 
                 _token = await SafeCreateNewToken(iotHub, _suggestedTimeToLiveSeconds).ConfigureAwait(false);
 
-                var sas = SharedAccessSignature.Parse(".", _token);
-                ExpiresOn = sas.ExpiresOn;
+                //var sas = SharedAccessSignature.Parse(".", _token);
+                //!!ExpiresOn = sas.ExpiresOn;
+                ExpiresOn = DateTime.UtcNow.AddSeconds(100);
                 UpdateTimeBufferSeconds((int)(ExpiresOn - DateTime.UtcNow).TotalSeconds);
 
                 if (Logging.IsEnabled)

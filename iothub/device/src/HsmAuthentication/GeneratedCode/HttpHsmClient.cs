@@ -42,6 +42,100 @@ namespace Microsoft.Azure.Devices.Client.HsmAuthentication.GeneratedCode
 
         /// <param name="api_version">The version of the API.</param>
         /// <param name="name">The name of the module on whose behalf the payload will be signed. (urlencoded)</param>
+        /// <param name="payload">The data to be signed.</param>
+        /// <returns>Ok</returns>
+        /// <exception cref="SwaggerException">A server side error occurred.</exception>
+        public System.Threading.Tasks.Task<GenerateTokenResponse> GenerateTokenAsync(string api_version, string name)
+        {
+            return GenerateTokenAsync(api_version, name, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="api_version">The version of the API.</param>
+        /// <returns>Ok</returns>
+        /// <exception cref="IoTEdgedException">A server side error occurred.</exception>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        public async System.Threading.Tasks.Task<GenerateTokenResponse> GenerateTokenAsync(string api_version, string name, System.Threading.CancellationToken cancellationToken)
+        {
+            if (api_version == null)
+                throw new System.ArgumentNullException("api_version");
+
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/modules/{name}/token/generate?");
+            urlBuilder_.Replace("{name}", System.Net.WebUtility.UrlEncode(ConvertToString(name, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Append("api-version=").Append(System.Net.WebUtility.UrlEncode(ConvertToString(api_version, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Length--;
+
+            var client_ = _httpClient;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = ((int)response_.StatusCode).ToString();
+                        if (status_ == "200")
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var result_ = default(GenerateTokenResponse);
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<GenerateTokenResponse>(responseData_, _settings.Value);
+                                return result_;
+                            }
+                            catch (System.Exception exception_)
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var result_ = default(ErrorResponse);
+                            try
+                            {
+                                result_ = Newtonsoft.Json.JsonConvert.DeserializeObject<ErrorResponse>(responseData_, _settings.Value);
+                            }
+                            catch (System.Exception exception_)
+                            {
+                                throw new SwaggerException("Could not deserialize the response body.", (int)response_.StatusCode, responseData_, headers_, exception_);
+                            }
+                            throw new SwaggerException<ErrorResponse>("Error", (int)response_.StatusCode, responseData_, headers_, result_, null);
+                        }
+
+                        return default(GenerateTokenResponse);
+                    }
+                    finally
+                    {
+                        if (response_ != null)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+            }
+        }
+
+        /// <param name="api_version">The version of the API.</param>
+        /// <param name="name">The name of the module on whose behalf the payload will be signed. (urlencoded)</param>
         /// <param name="genid">The generation identifier for the module as generated by IoT Hub.</param>
         /// <param name="payload">The data to be signed.</param>
         /// <returns>Ok</returns>
@@ -836,6 +930,47 @@ namespace Microsoft.Azure.Devices.Client.HsmAuthentication.GeneratedCode
         public static SignRequest FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<SignRequest>(data);
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+                handler(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "9.10.46.0 (Newtonsoft.Json v9.0.0.0)")]
+    internal partial class GenerateTokenResponse : System.ComponentModel.INotifyPropertyChanged
+    {
+        private string _token;
+
+        /// <summary>Signature of the data.</summary>
+        [Newtonsoft.Json.JsonProperty("token", Required = Newtonsoft.Json.Required.Always)]
+        public string Token
+        {
+            get { return _token; }
+            set
+            {
+                if (_token != value)
+                {
+                    _token = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        public string ToJson()
+        {
+            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
+        }
+
+        public static GenerateTokenResponse FromJson(string data)
+        {
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GenerateTokenResponse>(data);
         }
 
         public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;

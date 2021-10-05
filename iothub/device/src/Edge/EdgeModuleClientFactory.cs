@@ -86,27 +86,43 @@ namespace Microsoft.Azure.Devices.Client.Edge
                 string authScheme = GetValueFromEnvironment(envVariables, AuthSchemeVariableName) ?? throw new InvalidOperationException($"Environment variable {AuthSchemeVariableName} is required.");
                 string generationId = GetValueFromEnvironment(envVariables, ModuleGenerationIdVariableName) ?? throw new InvalidOperationException($"Environment variable {ModuleGenerationIdVariableName} is required.");
                 string gateway = GetValueFromEnvironment(envVariables, GatewayHostnameVariableName);
+                /*string edgedUri = "http://localhost:8000";
+                string deviceId = "lvl5";
+                string moduleId = "SimulatedTemperatureSensor";
+                string hostname = "huguesHub.azure-devices.net";
+                string authScheme = "sasToken";
+                string generationId = "637686431539906687";
+                string gateway = "192.168.4.23";*/
 
                 if (!string.Equals(authScheme, SasTokenAuthScheme, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new InvalidOperationException($"Unsupported authentication scheme. Supported scheme is {SasTokenAuthScheme}.");
                 }
 
-                ISignatureProvider signatureProvider = new HttpHsmSignatureProvider(edgedUri, DefaultApiVersion);
+                HttpHsmSPIFFETokenProvider tokenProvider = new HttpHsmSPIFFETokenProvider(edgedUri, DefaultApiVersion);
 
                 TimeSpan sasTokenTimeToLive = _options?.SasTokenTimeToLive ?? default;
                 int sasTokenRenewalBuffer = _options?.SasTokenRenewalBuffer ?? default;
 
 #pragma warning disable CA2000 // Dispose objects before losing scope - IDisposable ModuleAuthenticationWithHsm is disposed when the client is disposed.
                 // Since the sdk creates the instance of disposable ModuleAuthenticationWithHsm, the sdk needs to dispose it once the client is disposed.
-                var authMethod = new ModuleAuthenticationWithHsm(signatureProvider, deviceId, moduleId, generationId, sasTokenTimeToLive, sasTokenRenewalBuffer, disposeWithClient: true);
+                var authMethod = new ModuleAuthenticationWithHsmSPIFFE(tokenProvider, deviceId, moduleId, generationId, sasTokenTimeToLive, sasTokenRenewalBuffer, disposeWithClient: true);
 #pragma warning restore CA2000 // Dispose objects before losing scope - IDisposable ModuleAuthenticationWithHsm is disposed when the client is disposed.
 
                 Debug.WriteLine("EdgeModuleClientFactory setupTrustBundle from service");
 
                 ICertificateValidator certificateValidator = NullCertificateValidator.Instance;
+
                 if (!string.IsNullOrEmpty(gateway))
                 {
+                    /*#pragma warning disable CA2000 // Dispose objects before losing scope - IDisposable ModuleAuthenticationWithHsm is disposed when the client is disposed.
+                    X509Certificate2 clientCertificate = new X509Certificate2("C:\\Git\\certs\\certs\\azure-iot-test-only.root.ca.cert.pem");
+                    #pragma warning restore CA2000 // Dispose objects before losing scope - IDisposable ModuleAuthenticationWithHsm is disposed when the client is disposed.
+
+                    IList<X509Certificate2> certs = new List<X509Certificate2>();
+                    certs.Add(clientCertificate);
+
+                    await Task.FromResult(0).ConfigureAwait(true);*/
                     IList<X509Certificate2> certs = await _trustBundleProvider.GetTrustBundleAsync(new Uri(edgedUri), DefaultApiVersion).ConfigureAwait(false);
                     certificateValidator = GetCertificateValidator(certs);
                 }
