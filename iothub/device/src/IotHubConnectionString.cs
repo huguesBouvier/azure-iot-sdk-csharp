@@ -21,18 +21,21 @@ namespace Microsoft.Azure.Devices.Client
 
             Audience = builder.HostName;
             IsUsingGateway = !string.IsNullOrEmpty(builder.GatewayHostName);
-            HostName = IsUsingGateway
-                ? builder.GatewayHostName
-                : builder.HostName;
+            HostName = builder.HostName;
+            GatewayHostName = builder.GatewayHostName;
             SharedAccessKeyName = builder.SharedAccessKeyName;
             SharedAccessKey = builder.SharedAccessKey;
             IotHubName = builder.IotHubName;
             DeviceId = builder.DeviceId;
             ModuleId = builder.ModuleId;
 
-            HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, HostName).Uri;
+            var upstream = IsUsingGateway
+                ? builder.GatewayHostName
+                : builder.HostName;
 
-            AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, HostName, DefaultSecurePort).Uri;
+            HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, upstream).Uri;
+
+            AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, upstream, DefaultSecurePort).Uri;
 
             if (builder.AuthenticationMethod is AuthenticationWithTokenRefresh)
             {
@@ -122,6 +125,8 @@ namespace Microsoft.Azure.Devices.Client
         public string IotHubName { get; private set; }
 
         public string DeviceId { get; private set; }
+
+        public string GatewayHostName { get; private set; }
 
         public string ModuleId { get; private set; }
 

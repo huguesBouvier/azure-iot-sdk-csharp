@@ -489,7 +489,7 @@ namespace Microsoft.Azure.Devices.Shared
 
 #endif
 
-        public static new bool IsEnabled => Log.IsEnabled();
+        public static new bool IsEnabled = true;
 
         [NonEvent]
         public static string IdOf(object value) => value != null ? value.GetType().Name + "#" + GetHashCode(value) : NullInstance;

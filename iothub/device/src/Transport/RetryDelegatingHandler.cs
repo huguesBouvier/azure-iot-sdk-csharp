@@ -972,7 +972,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         // vs calling this when no more retry attempts are being made.
         private void HandleConnectionStatusExceptions(Exception exception, bool connectFailed = false)
         {
-            Logging.Info(this, $"Received exception: {exception}, connectFailed={connectFailed}", nameof(HandleConnectionStatusExceptions));
+            Console.WriteLine($"Received exception: {exception}, connectFailed={connectFailed}", nameof(HandleConnectionStatusExceptions));
 
             ConnectionStatusChangeReason reason = ConnectionStatusChangeReason.Communication_Error;
             ConnectionStatus status = ConnectionStatus.Disconnected;

@@ -104,6 +104,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         private readonly string _deviceboundMessageFilter;
         private readonly string _deviceboundMessagePrefix;
         private readonly string _hostName;
+        private readonly bool _usingGatewayHostname;
+        private readonly string _gatewayHostname;
         private readonly Func<IPAddress[], int, Task<IChannel>> _channelFactory;
         private readonly Queue<string> _completionQueue;
         private readonly MqttIotHubAdapterFactory _mqttIotHubAdapterFactory;
@@ -162,6 +164,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
             _serverAddresses = null; // this will be resolved asynchronously in OpenAsync
             _hostName = iotHubConnectionString.HostName;
+            _gatewayHostname = iotHubConnectionString.GatewayHostName;
+            _usingGatewayHostname = iotHubConnectionString.IsUsingGateway;
             _receiveEventMessageFilter = string.Format(CultureInfo.InvariantCulture, ReceiveEventMessagePatternFilter, iotHubConnectionString.DeviceId, iotHubConnectionString.ModuleId);
             _receiveEventMessagePrefix = string.Format(CultureInfo.InvariantCulture, ReceiveEventMessagePrefixPattern, iotHubConnectionString.DeviceId, iotHubConnectionString.ModuleId);
 
@@ -979,6 +983,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         private async Task OpenInternalAsync(CancellationToken cancellationToken)
         {
+            Console.WriteLine("Start open async");
             cancellationToken.ThrowIfCancellationRequested();
             if (IsProxyConfigured())
             {
@@ -995,9 +1000,11 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 #if NET451
                 _serverAddresses = Dns.GetHostEntry(_hostName).AddressList;
 #else
-                _serverAddresses = await Dns.GetHostAddressesAsync(_hostName).ConfigureAwait(false);
+                _serverAddresses = await Dns.GetHostAddressesAsync(_gatewayHostname).ConfigureAwait(false);           
 #endif
             }
+
+            Console.WriteLine($"Server address {_serverAddresses[0]}");
 
             if (TryStateTransition(TransportState.NotInitialized, TransportState.Opening))
             {
@@ -1039,8 +1046,10 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     }
                 });
             }
+            Console.WriteLine("Wait open");
 
             await _connectCompletion.Task.ConfigureAwait(false);
+            Console.WriteLine("Completed open");
 
             // Codes_SRS_CSHARP_MQTT_TRANSPORT_18_031: `OpenAsync` shall subscribe using the '$iothub/twin/res/#' topic filter
             await SubscribeTwinResponsesAsync().ConfigureAwait(true);
@@ -1206,7 +1215,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                      protocols,
                      settings.CertificateRevocationCheck,
                      certs,
-                     iotHubConnectionString.HostName);
+                     iotHubConnectionString.GatewayHostName);
 
                 Bootstrap bootstrap = new Bootstrap()
                     .Group(s_eventLoopGroup.Value)

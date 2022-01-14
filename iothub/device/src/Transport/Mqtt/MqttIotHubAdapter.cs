@@ -343,7 +343,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
                 if (!_mqttTransportSettings.AuthenticationChain.IsNullOrWhiteSpace())
                 {
-                    usernameString += $"&{AuthChainParam}={Uri.EscapeDataString(_mqttTransportSettings.AuthenticationChain)}";
+                    //usernameString += $"&{AuthChainParam}={Uri.EscapeDataString(_mqttTransportSettings.AuthenticationChain)}";
                 }
 
                 // This check is added to enable the device or module client to available plug and play features. For devices or modules that pass in the model Id,
@@ -353,8 +353,8 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     usernameString += $"&{ModelIdParam}={Uri.EscapeDataString(_options.ModelId)}";
                 }
 
-                if (Logging.IsEnabled)
-                    Logging.Info(this, $"{nameof(usernameString)}={usernameString}", nameof(ConnectAsync));
+                Console.Write($"string {usernameString}");
+                Logging.Info(this, $"{nameof(usernameString)}={usernameString}", nameof(ConnectAsync));
 
                 var connectPacket = new ConnectPacket
                 {
